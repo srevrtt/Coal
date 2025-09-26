@@ -15,6 +15,7 @@ sealed class TokenKind {
     data object If : TokenKind()
     data object Elif : TokenKind()
     data object Else : TokenKind()
+    data object While : TokenKind()
 
     // IDENTIFIERS & LITERALS
     data object Identifier : TokenKind()

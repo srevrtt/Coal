@@ -22,7 +22,8 @@ class Lexer(
         "string" to TokenKind.KwString,
         "if" to TokenKind.If,
         "elif" to TokenKind.Elif,
-        "else" to TokenKind.Else
+        "else" to TokenKind.Else,
+        "while" to TokenKind.While
     )
 
     fun lex(): List<Token> {

@@ -13,4 +13,9 @@ fn main() {
     var b = true
     if(a && (println("never runs") == 0)) { }
     if(b || (println("also skipped") == 0)) { }
+
+    var index = 0
+    while (index < 5) {
+        index = index + 1
+    }
 }
