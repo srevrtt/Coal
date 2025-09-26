@@ -59,6 +59,10 @@ import kotlinx.serialization.Serializable
     val elseBranch: Block?
 ) : Stmt
 
+@Serializable data class WhileStmt(
+    val body: Block
+) : Stmt
+
 @Serializable data class IfBranch(
     val condition: Expr,
     val body: Block
