@@ -24,6 +24,7 @@ fun main(argv: Array<String>) {
     val startTime = System.currentTimeMillis()
 
     try {
+        // Lexer
         val tokens = Lexer(source, inputPath.fileName.toString()).lex()
         if(args.emitTokens) {
             println("TOKENS (" + tokens.size + "):")
@@ -56,6 +57,7 @@ fun main(argv: Array<String>) {
             return
         }
 
+        // Parser
         val program: Program = Parser(tokens, inputPath.fileName.toString()).parseProgram()
         if(args.emitAst) {
             val json = Json { prettyPrint = true; classDiscriminator = "kind" }
@@ -63,13 +65,15 @@ fun main(argv: Array<String>) {
             return
         }
 
+        // IR generation
+        val ir = LLVMEmitter().emit(program)
         if(args.emitIR) {
-            val ir = LLVMEmitter().emit(program)
             println(ir)
             return
         }
 
-        val ir = LLVMEmitter().emit(program)
+        // Write the IR to a file (with the format "coal-[...].ll" if we don't keep the IR,
+        // and "filename.ll" if we do, assuming `filename` is the name of the Coal source file.)
         val outPath = computeOutputBinaryPath(args, inputPath)
         val llPath =
             if(args.keepLL) {
@@ -79,6 +83,8 @@ fun main(argv: Array<String>) {
             }
 
         Files.writeString(llPath, ir)
+
+        // Compile the IR into an executable file using clang.
         val cc = pickCompiler(args.cc)
         val cmd = if(cc == "clang") {
             listOf("clang", llPath.toString(), "-o", outPath.toString())
@@ -86,6 +92,7 @@ fun main(argv: Array<String>) {
             listOf("clang", llPath.toString(), "-o", outPath.toString())
         }
 
+        // Create a process for clang.
         val pb = ProcessBuilder(cmd).redirectErrorStream(true)
         val proc = pb.start()
         val out = proc.inputStream.bufferedReader().readText()
@@ -97,7 +104,7 @@ fun main(argv: Array<String>) {
             exitProcess(code)
         }
 
-        if(!args.keepLL) llPath.deleteIfExists()
+        if(!args.keepLL) llPath.deleteIfExists() // Delete the temporary file
 
         val endTime = System.currentTimeMillis()
         val dur = endTime - startTime
